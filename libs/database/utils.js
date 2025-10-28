@@ -1,10 +1,8 @@
 const async = require("async");
 module.exports = function(s,config){
     const isMySQL = config.databaseType === 'mysql';
-    const runQuery = async.queue(function(data, callback) {
-        s.databaseEngine
-        .raw(data.query,data.values)
-        .asCallback(callback)
+    const runQuery = async.queue(function({ dbQuery }, callback) {
+        dbQuery.asCallback(callback)
     }, 4);
     function stringToSqlTime(value){
         newValue = new Date(value.replace('T',' '))
@@ -155,7 +153,9 @@ module.exports = function(s,config){
                 console.log(JSON.stringify(options,null,3))
             }
             if(callback || options.update || options.insert || options.action === 'delete'){
-                dbQuery.asCallback(function(err,r) {
+                runQuery.push({
+                    dbQuery,
+                },function(err,r){
                     if(err){
                         knexError(dbQuery,options,err)
                     }
@@ -216,6 +216,9 @@ module.exports = function(s,config){
        }
        if(options.archived){
            whereQuery.push(['archive','=',`1`])
+       }
+       if(options.itemType){
+           whereQuery.push(['type','=',options.itemType])
        }
        if(options.filename){
            whereQuery.push(['filename','=',options.filename])
@@ -325,6 +328,7 @@ module.exports = function(s,config){
         const groupKey = options.groupKey
         const monitorId = options.monitorId
         const archived = options.archived
+        const itemType = options.type
         const theTableSelected = options.table
         const endIsStartTo = options.endIsStartTo
         const userDetails = user.details
@@ -345,6 +349,7 @@ module.exports = function(s,config){
             limit: options.noLimit === '1' ? '0' : options.limit,
             archived: archived,
             rowType: rowName,
+            itemType: itemType,
             endIsStartTo: endIsStartTo
         },(response) => {
             const limit = response.limit
@@ -387,6 +392,7 @@ module.exports = function(s,config){
                     endOperator: endTimeOperator,
                     archived: archived,
                     type: 'count',
+                    itemType: itemType,
                     endIsStartTo: endIsStartTo
                 },(response) => {
                     const count = response.count

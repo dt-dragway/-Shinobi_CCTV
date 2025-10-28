@@ -174,7 +174,7 @@ $(document).ready(function(e){
             }
             var apiUrl = `${getApiPrefix(apiPoint)}/${monitorId}`
             if(apiPoint === 'embed'){
-                apiUrl += `/fullscreen|jquery|gui|relative?host=${location.pathname}`
+                apiUrl += `/fullscreen|jquery|gui|relative?host=${location.origin + location.pathname}`
             }else{
                 apiUrl += '/s.jpg'
             }
@@ -358,13 +358,23 @@ $(document).ready(function(e){
     })
     addOnTabOpen('regionEditor', function () {
         drawMonitorListToSelector(regionEditorMonitorsList,true)
+        var theSelected = `${regionEditorMonitorsList.val()}`
+        var monitor = loadedMonitors[theSelected]
+        loadRegionEditor(monitor)
         initLiveStream()
     })
     addOnTabReopen('regionEditor', function () {
-        initLiveStream()
         var theSelected = `${regionEditorMonitorsList.val()}`
-        drawMonitorListToSelector(regionEditorMonitorsList)
-        regionEditorMonitorsList.val(theSelected)
+        var monitorExists = !!loadedMonitors[theSelected]
+        drawMonitorListToSelector(regionEditorMonitorsList, !monitorExists)
+        if(monitorExists){
+            regionEditorMonitorsList.val(theSelected)
+        }else{
+            theSelected = `${regionEditorMonitorsList.val()}`
+        }
+        var monitor = loadedMonitors[theSelected]
+        loadRegionEditor(monitor)
+        initLiveStream()
     })
     addOnTabAway('regionEditor', function () {
         regionEditorLiveView.find('iframe,img').attr('src','about:blank')
