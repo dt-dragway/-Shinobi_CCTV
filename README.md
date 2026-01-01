@@ -1,77 +1,377 @@
-# Shinobi Pro
-### (Shinobi Open Source Software)
+# 🎥 Shinobi CCTV - Sistema de Videovigilancia
 
-Shinobi is the Open Source CCTV Solution written in Node.JS. Designed with multiple account system, Streams by WebSocket, and Direct saving to MP4. Shinobi can record IP Cameras and Local Cameras.
+![Node.js](https://img.shields.io/badge/node-v20.19.5-green) ![MariaDB](https://img.shields.io/badge/MariaDB-11.8.3-blue) ![FFmpeg](https://img.shields.io/badge/FFmpeg-7.1.2-orange)
 
-## Install and Use
+Sistema CCTV/NVR (Network Video Recorder) de código abierto basado en [Shinobi](https://shinobi.video), escrito en Node.js. Diseñado para grabar y monitorear cámaras IP y cámaras locales con soporte para múltiples usuarios.
 
-- Installation : http://shinobi.video/docs/start
-- Post-Installation Tutorials : http://shinobi.video/docs/configure
-- Troubleshooting Guide : https://hub.shinobi.video/articles/view/v0AFPFchfVcFGUS
+---
 
-#### Docker
-- Install with **Docker** : https://gitlab.com/Shinobi-Systems/Shinobi/-/tree/dev/Docker
+## 📋 Características
 
-## "is my camera supported?"
+- ✅ **Grabación continua** de cámaras IP y locales
+- ✅ **Streaming en vivo** mediante WebSocket
+- ✅ **Detección de movimiento** con regiones configurables
+- ✅ **Multi-usuario** con permisos personalizables
+- ✅ **Almacenamiento en la nube** (AWS S3, Backblaze B2)
+- ✅ **Notificaciones** por email, Discord, MQTT
+- ✅ **API REST** completa para integración
+- ✅ **Soporte ONVIF** para cámaras compatibles
+- ✅ **Timelapses** automáticos
+- ✅ **Interfaz web responsive**
 
-Ask yourself these questions to get a general sense.
+---
 
-- Does it have ONVIF?
-    - If yes, then it may have H.264 or H.265 streaming capability.
-- Does it have RTSP Protocol for Streaming?
-    - If yes, then it may have H.264 or H.265 streaming capability.
-- Can you stream it in VLC Player?
-    - If yes, use that same URL in Shinobi. You may need to specify the port number when using `rtsp://` protocol.
-- Does it have MJPEG Streaming?
-    - While this would work in Shinobi, it is far from ideal. Please see if any of the prior questions are applicable.
-- Does it have a web interface that you can connect to directly?
-    - If yes, then you may be able to find model information that can be used to search online for a streaming URL.
+## 🖥️ Requisitos del Sistema
 
-Configuration Guides : http://shinobi.video/docs/configure
+### Software Necesario
 
-## Asking for help
+| Componente | Versión Instalada | Mínimo Requerido |
+|------------|-------------------|------------------|
+| **Node.js** | v20.19.5 | v8.11+ |
+| **MariaDB/MySQL** | 11.8.3 | 15.1+ |
+| **FFmpeg** | 7.1.2 | 3.3.3+ |
+| **PM2** | Instalado | Recomendado |
 
-- General Support : https://shinobi.community
-    - Please be sure to read the `#guidelines` channel after joining.
-- Business Inquiries : business@shinobi.video or the Live Chat on https://shinobi.video
+### Hardware Recomendado
 
-## Support the Development
+- **CPU:** 2+ cores (4+ recomendado para múltiples cámaras)
+- **RAM:** 4GB mínimo (8GB+ recomendado)
+- **Disco:** SSD recomendado para grabaciones
+- **Red:** 100Mbps+ para streaming fluido
 
-It's a proven fact that generosity makes you a happier person :) https://www.nature.com/articles/ncomms15964
+---
 
-Get a Mobile License to unlock extended features on the Mobile App as well as support the development!
-- Shinobi Mobile App : https://cdn.shinobi.video/installers/ShinobiMobile/
-- Get a Mobile License : https://licenses.shinobi.video/subscribe?planSubscribe=plan_G31AZ9mknNCa6z
+## 🚀 Instalación
 
-## Why make this?
+### 1. Clonar el Repositorio
 
-http://shinobi.video/why
+```bash
+git clone https://github.com/dt-dragway/-Shinobi_CCTV.git
+cd -Shinobi_CCTV
+```
 
-## Author
+### 2. Instalar Dependencias
 
-Moe Alam, Shinobi Systems
+```bash
+npm install
+```
 
-Shinobi is developed by many contributors. See here 
-https://gitlab.com/Shinobi-Systems/Shinobi/-/graphs/dev
+### 3. Configurar Base de Datos
 
-## Support the Development
+#### Crear Base de Datos y Usuario
 
-Ordering a certificate or support package greatly boosts development. Please consider contributing :)
+```bash
+mysql -u root -p < sql/user.sql
+mysql -u root -p < sql/framework.sql
+```
 
-http://shinobi.video/support
+O manualmente:
 
-## Links
+```sql
+CREATE DATABASE IF NOT EXISTS ccio;
+CREATE USER 'majesticflame'@'127.0.0.1' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON ccio.* TO 'majesticflame'@'127.0.0.1';
+FLUSH PRIVILEGES;
+```
 
-- Articles : http://hub.shinobi.video/articles
-- Documentation : http://shinobi.video/docs
-- Features List : http://shinobi.video/features
-    - Some features may not be listed.
-- Donation : http://shinobi.video/docs/donate
-- Buy Shinobi Stuff : https://licenses.shinobi.video
-- User Submitted Configurations : http://shinobi.video/docs/cameras
-- Features : http://shinobi.video/features
-- Reddit (Forum) : https://www.reddit.com/r/ShinobiCCTV/
-- YouTube (Tutorials) : https://www.youtube.com/channel/UCbgbBLTK-koTyjOmOxA9msQ
-- Discord (Community Chat) : https://discordapp.com/invite/mdhmvuH
-- Twitter (News) : https://twitter.com/ShinobiCCTV
-- Facebook (News) : https://www.facebook.com/Shinobi-1223193167773738/?ref=bookmarks
+### 4. Configurar Shinobi
+
+#### Crear archivo de configuración
+
+```bash
+cp conf.sample.json conf.json
+```
+
+#### Editar configuración (opcional)
+
+```bash
+nano conf.json
+```
+
+Configuración básica:
+```json
+{
+  "port": 8080,
+  "db": {
+    "host": "127.0.0.1",
+    "user": "majesticflame",
+    "password": "",
+    "database": "ccio",
+    "port": 3306
+  }
+}
+```
+
+### 5. Habilitar Interfaz de Superusuario
+
+```bash
+cp super.sample.json super.json
+```
+
+### 6. Iniciar Shinobi
+
+#### Opción A: Con PM2 (Recomendado)
+
+```bash
+pm2 start camera.js --name camera
+pm2 start cron.js --name cron
+pm2 save
+pm2 startup
+```
+
+#### Opción B: Modo Desarrollo
+
+```bash
+# Terminal 1
+node camera.js
+
+# Terminal 2
+node cron.js
+```
+
+---
+
+## 🔐 Acceso Inicial
+
+### Interfaz de Superusuario
+
+**URL:** http://localhost:8080/super
+
+**Credenciales por defecto:**
+- Email: `admin@shinobi.video`
+- Contraseña: `admin`
+
+> ⚠️ **Importante:** Cambia estas credenciales después del primer acceso.
+
+### Crear Usuario Regular
+
+1. Accede a http://localhost:8080/super
+2. Inicia sesión con las credenciales de superusuario
+3. Crea un nuevo usuario desde el panel
+4. Cierra sesión y accede con el nuevo usuario en http://localhost:8080
+
+---
+
+## 📹 Agregar Cámaras
+
+### Requisitos de la Cámara
+
+Tu cámara debe soportar al menos uno de estos protocolos:
+- **RTSP** (Recomendado)
+- **ONVIF**
+- **MJPEG**
+- **HTTP/HTTPS**
+
+### Configuración Básica
+
+1. Accede al panel de usuario: http://localhost:8080
+2. Haz clic en "Monitors" → "Add Monitor"
+3. Completa la información:
+   - **Name:** Nombre de la cámara
+   - **Type:** RTSP, MJPEG, etc.
+   - **Host:** IP de la cámara
+   - **Port:** Puerto (usualmente 554 para RTSP)
+   - **Path:** Ruta del stream
+   - **Username/Password:** Credenciales de la cámara
+
+### Ejemplo de URL RTSP
+
+```
+rtsp://usuario:contraseña@192.168.1.100:554/stream1
+```
+
+---
+
+## ⚙️ Configuración Avanzada
+
+### Almacenamiento Adicional
+
+Edita `conf.json`:
+
+```json
+{
+  "addStorage": [
+    {
+      "name": "segundo",
+      "path": "/ruta/al/almacenamiento"
+    }
+  ]
+}
+```
+
+### Notificaciones por Email
+
+```json
+{
+  "mail": {
+    "service": "gmail",
+    "auth": {
+      "user": "tu_email@gmail.com",
+      "pass": "tu_contraseña_de_aplicacion"
+    }
+  }
+}
+```
+
+### Almacenamiento en la Nube (AWS S3)
+
+Configura desde el panel web en "Cloud Storage Settings".
+
+---
+
+## 🛠️ Comandos Útiles
+
+### Gestión con PM2
+
+```bash
+# Ver procesos
+pm2 list
+
+# Ver logs
+pm2 logs camera
+pm2 logs cron
+
+# Reiniciar
+pm2 restart camera
+pm2 restart cron
+
+# Detener
+pm2 stop camera
+pm2 stop cron
+
+# Eliminar
+pm2 delete camera
+pm2 delete cron
+```
+
+### Base de Datos
+
+```bash
+# Acceder a MySQL
+mysql -u majesticflame -h 127.0.0.1 ccio
+
+# Ver usuarios
+SELECT * FROM Users;
+
+# Ver monitores
+SELECT * FROM Monitors;
+
+# Ver videos
+SELECT * FROM Videos ORDER BY time DESC LIMIT 10;
+```
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+-Shinobi_CCTV/
+├── camera.js           # Proceso principal del servidor
+├── cron.js             # Tareas programadas
+├── conf.json           # Configuración (no en git)
+├── super.json          # Superusuario (no en git)
+├── libs/               # Librerías del sistema
+├── web/                # Interfaz web
+│   ├── assets/         # CSS, JS, imágenes
+│   ├── pages/          # Páginas HTML
+│   └── libs/           # Librerías frontend
+├── plugins/            # Plugins del sistema
+├── sql/                # Scripts de base de datos
+├── videos/             # Almacenamiento de videos
+├── languages/          # Archivos de idioma
+└── node_modules/       # Dependencias npm
+```
+
+---
+
+## 🔧 Solución de Problemas
+
+### El servidor no inicia
+
+```bash
+# Verificar que el puerto 8080 esté libre
+sudo netstat -tulpn | grep 8080
+
+# Verificar logs
+pm2 logs camera
+```
+
+### No se conecta a la base de datos
+
+```bash
+# Verificar que MySQL esté corriendo
+sudo systemctl status mysql
+
+# Probar conexión
+mysql -u majesticflame -h 127.0.0.1 ccio
+```
+
+### La cámara no se conecta
+
+1. Verifica que la URL RTSP sea correcta
+2. Prueba la URL en VLC Player
+3. Revisa los logs: `pm2 logs camera`
+4. Verifica que FFmpeg esté instalado: `ffmpeg -version`
+
+### Problemas de permisos
+
+```bash
+# Dar permisos a las carpetas de videos
+chmod -R 755 videos/
+chmod -R 755 videos2/
+```
+
+---
+
+## 📚 Documentación Adicional
+
+- **Documentación Oficial:** http://shinobi.video/docs
+- **Configuración de Cámaras:** http://shinobi.video/docs/cameras
+- **API REST:** http://shinobi.video/docs/api
+- **Comunidad:** https://shinobi.community
+- **Discord:** https://discordapp.com/invite/mdhmvuH
+
+---
+
+## 🤝 Contribuir
+
+Este es un fork personal del proyecto Shinobi. Para contribuir al proyecto original:
+
+- **Repositorio Original:** https://gitlab.com/Shinobi-Systems/Shinobi
+- **Guía de Contribución:** [CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+## 📄 Licencia
+
+Este proyecto está basado en Shinobi y mantiene su licencia original.
+
+Ver [LICENSE.md](LICENSE.md) y [COPYING.md](COPYING.md) para más detalles.
+
+---
+
+## 👨‍💻 Autor
+
+**Fork mantenido por:** [@dt-dragway](https://github.com/dt-dragway)
+
+**Proyecto Original:** Moe Alam, Shinobi Systems
+
+---
+
+## 🌟 Agradecimientos
+
+- Al equipo de Shinobi Systems por crear este increíble software
+- A la comunidad de código abierto
+- A todos los contribuidores del proyecto original
+
+---
+
+## 📞 Soporte
+
+- **Issues:** https://github.com/dt-dragway/-Shinobi_CCTV/issues
+- **Documentación:** http://shinobi.video/docs
+- **Comunidad:** https://shinobi.community
+
+---
+
+**¡Disfruta de tu sistema de videovigilancia!** 🎥✨
