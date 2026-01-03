@@ -1,18 +1,104 @@
+# Dependencias
 node_modules
-videos
-frames
-web.old
-.DS_Store
-.vagrant
+npm-debug.log
+package-lock.json
+
+# Configuración local
 conf.json
 super.json
+.env
+.env.local
+
+# Bases de datos
 dbdata
-npm-debug.log
 shinobi.sqlite
-dist
-._*
-generatedLanguageFiles
+*.sqlite
+*.sqlite3
+*.db
+
+# Directorios de archivos multimedia
+videos
+videos/
+videos2/
+frames
+fileBin/
 faces
 unknownFaces
+
+# Archivos de video (todos los formatos comunes)
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.flv
+*.wmv
+*.webm
+*.m4v
+*.mpg
+*.mpeg
+*.3gp
+*.ts
+*.m2ts
+
+# Archivos de imagen (formatos pesados)
+*.psd
+*.ai
+*.raw
+*.cr2
+*.nef
+*.tif
+*.tiff
+*.bmp
+
+# Archivos de audio
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.wma
+*.m4a
+
+# Archivos comprimidos grandes
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.iso
+
+# Logs y archivos temporales
+*.log
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+*~
+
+# Archivos del sistema
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+
+# IDEs y editores
 .idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Directorios de build y distribución
+dist
+build
+web.old
+generatedLanguageFiles
+
+# Herramientas de desarrollo
+.vagrant
 /ffmpeg
+
+# Backups
+*.bak
+*.backup
+*~
