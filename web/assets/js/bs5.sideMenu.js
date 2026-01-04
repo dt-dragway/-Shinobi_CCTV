@@ -6,7 +6,7 @@ var monitorSideList = $('#monitorSideList')
 var sideMenuCollapsePoint = $('#side-menu-collapse-point')
 var floatingHideButton = $('#floating-hide-button')
 var floatingBackButton = $('#floating-back-button')
-function buildTabHtml(tabName,tabLabel,tabIcon){
+function buildTabHtml(tabName, tabLabel, tabIcon) {
     return `<li class="nav-link side-menu-link cursor-pointer" page-open="${tabName}">
         <div class="d-flex flex-row">
             <div class="d-flex pr-2">
@@ -25,7 +25,7 @@ function buildTabHtml(tabName,tabLabel,tabIcon){
         </div>
       </li>`
 }
-function drawMonitorIconToMenu(item){
+function drawMonitorIconToMenu(item) {
     var html = `<li class="nav-item monitor-icon monitor_block glM${item.mid}" data-ke="${item.ke}" data-mid="${item.mid}" data-status-code="${item.code}">
         <div title="Monitor ID : ${item.mid}" class="d-flex d-flex-row align-items-center p-2 mt-0 mb-3 mx-0 btn btn-default rounded shadow-sm cursor-pointer">
           <div class="lh-1 text-start">
@@ -51,210 +51,260 @@ function drawMonitorIconToMenu(item){
     </li>`
     monitorSideList.append(html)
 }
-function drawMonitors(){
+function drawMonitors() {
     monitorSideList.empty()
-    $.each(loadedMonitors,function(n,item){
+    $.each(loadedMonitors, function (n, item) {
         drawMonitorIconToMenu(item)
     })
 }
-function resizeMonitorIcons(){
+function resizeMonitorIcons() {
     var monitorIcons = sidebarMenuInner.find('.monitor_block img')
     var iconWidth = monitorIcons.first().width()
     monitorIcons.css({
         height: `${iconWidth}px`,
     })
 }
-function fixSideMenuScroll(){
+function fixSideMenuScroll() {
     sidebarMenuInner.css({
         height: window.innerHeight - (topMenu.height() || 0),
         overflow: "auto",
     })
 }
-function correctDropdownPosition(dropdownElement){
+function correctDropdownPosition(dropdownElement) {
     var p = dropdownElement.offset();
     var dropdDownHeight = dropdownElement.height()
     var windowHeight = window.innerHeight
     var modifyX = p.left < 0
     var modifyY = p.top + dropdDownHeight > windowHeight
-    if (modifyX || modifyY){
+    if (modifyX || modifyY) {
         dropdownElement[0].style = `transform:translate(${modifyX ? -p.left + 20 : 0}px, ${modifyY ? -dropdDownHeight - 20 : 0}px)!important;`
     }
 }
-function correctDropdownPositionAfterChange(dropdownElement){
-    if(sideListMenuDropdownOpen){
+function correctDropdownPositionAfterChange(dropdownElement) {
+    if (sideListMenuDropdownOpen) {
         clearTimeout(sideListScrollTimeout)
-        sideListScrollTimeout = setTimeout(function(){
+        sideListScrollTimeout = setTimeout(function () {
             correctDropdownPosition(sideListMenuDropdownOpen)
-        },500)
+        }, 500)
     }
 }
-function sortListMonitors(){
-    if(!$user.details.monitorListOrder)$user.details.monitorListOrder = {0:[]}
-    var getIdPlace = function(x){return $user.details.monitorListOrder[0].indexOf(x)}
-    monitorSideList.find('.monitor_block').sort(function(a, b) {
+function sortListMonitors() {
+    if (!$user.details.monitorListOrder) $user.details.monitorListOrder = { 0: [] }
+    var getIdPlace = function (x) { return $user.details.monitorListOrder[0].indexOf(x) }
+    monitorSideList.find('.monitor_block').sort(function (a, b) {
         var contentA = getIdPlace($(a).attr('data-mid'))
         var contentB = getIdPlace($(b).attr('data-mid'))
         return contentA - contentB
-     }).each(function() {
-         monitorSideList.append($(this))
-     })
-     resizeMonitorIcons()
+    }).each(function () {
+        monitorSideList.append($(this))
+    })
+    resizeMonitorIcons()
 }
-function toggleSideMenuVisibility(){
-    if(pageTabContainer.hasClass('col-md-9')){
-        sidebarMenu.css('width','0px')
+function toggleSideMenuVisibility() {
+    if (pageTabContainer.hasClass('col-md-9')) {
+        sidebarMenu.css('width', '0px')
         pageTabContainer.addClass('col-md-12 col-lg-12')
         pageTabContainer.removeClass('col-md-9 col-lg-10')
-    }else{
-        sidebarMenu.css('width','')
+    } else {
+        sidebarMenu.css('width', '')
         pageTabContainer.removeClass('col-md-12 col-lg-12')
         pageTabContainer.addClass('col-md-9 col-lg-10')
     }
 }
-function toggleSideMenuCollapse(dontSaveChange){
+function toggleSideMenuCollapse(dontSaveChange) {
     var isVisible = sideMenuCollapsePoint.hasClass('show')
-    if(isVisible){
+    if (isVisible) {
         sideMenuCollapsePoint.collapse('hide')
-    }else{
+    } else {
         sideMenuCollapsePoint.collapse('show')
     }
-    if(!dontSaveChange)dashboardOptions('sideMenuCollapsed',!isVisible ? '0' : 1)
+    if (!dontSaveChange) dashboardOptions('sideMenuCollapsed', !isVisible ? '0' : 1)
 }
-function loadSideMenuCollapseStatus(){
+function loadSideMenuCollapseStatus() {
     var isCollapsed = dashboardOptions().sideMenuCollapsed === 1;
-    if(isCollapsed){
+    if (isCollapsed) {
         sideMenuCollapsePoint.collapse('hide')
-    }else{
+    } else {
         sideMenuCollapsePoint.collapse('show')
     }
     return isCollapsed
 }
-function isSideBarMenuCollapsed(){
+function isSideBarMenuCollapsed() {
     return dashboardOptions().sideMenuCollapsed === 1
 }
-function isSideBarMenuHidden(){
+function isSideBarMenuHidden() {
     return dashboardOptions().sideMenuHidden === 1
 }
-function toggleSideBarMenuHide(){
+function toggleSideBarMenuHide() {
     var theBody = $('body')
     theBody.toggleClass('hide-side-menu')
     var isHidden = theBody.hasClass('hide-side-menu')
-    dashboardOptions('sideMenuHidden',isHidden ? 1 : '0')
-    if(isHidden){
+    dashboardOptions('sideMenuHidden', isHidden ? 1 : '0')
+    if (isHidden) {
         floatingHideButton.show()
         floatingBackButton.hide()
-    }else{
+    } else {
         floatingHideButton.hide()
-        if(tabTree.back)floatingBackButton.show()
+        if (tabTree.back) floatingBackButton.show()
     }
-    onToggleSideBarMenuHideExtensions.forEach(function(extender){
+    onToggleSideBarMenuHideExtensions.forEach(function (extender) {
         extender(isHidden)
     })
 }
-function makeMonitorListSortable(){
+function makeMonitorListSortable() {
     var monitorSideList = $('#monitorSideList')
-    if(isMobile)return;
+    if (isMobile) return;
     var options = {
         cellHeight: 80,
         verticalMargin: 10,
     };
     monitorSideList.sortable({
         containment: "parent",
-        stop : function(event,ui){
+        stop: function (event, ui) {
             var order = []
             var monitorBlocks = monitorSideList.find('.monitor_block')
-            $.each(monitorBlocks,function(n,block){
+            $.each(monitorBlocks, function (n, block) {
                 var mid = $(block).attr('data-mid')
                 order.push(mid)
             })
-            $user.details.monitorListOrder = {0: order}
+            $user.details.monitorListOrder = { 0: order }
             mainSocket.f({
-                f:'monitorListOrder',
-                monitorListOrder: {0: order}
+                f: 'monitorListOrder',
+                monitorListOrder: { 0: order }
             })
         },
     })
 }
-$('#monitors_list_search').keyup(function(){
+$('#monitors_list_search').keyup(function () {
     var monitorBlocks = monitorSideList.find('.monitor_block');
     var searchTerms = $(this).val().toLowerCase().split(' ')
-    if(searchTerms.length === 0 || searchTerms[0] === ''){
+    if (searchTerms.length === 0 || searchTerms[0] === '') {
         monitorBlocks.show()
         return
     }
     monitorBlocks.hide()
-    $.each(loadedMonitors,function(n,monitor){
-        var searchThis = JSON.stringify(monitor).toLowerCase().replace('"','');
-        $.each(searchTerms,function(m,term){
-            if(searchThis.indexOf(term) >-1 ){
-                monitorSideList.find('.monitor_block[data-ke="'+monitor.ke+'"][data-mid="'+monitor.mid+'"]').show()
+    $.each(loadedMonitors, function (n, monitor) {
+        var searchThis = JSON.stringify(monitor).toLowerCase().replace('"', '');
+        $.each(searchTerms, function (m, term) {
+            if (searchThis.indexOf(term) > -1) {
+                monitorSideList.find('.monitor_block[data-ke="' + monitor.ke + '"][data-mid="' + monitor.mid + '"]').show()
             }
         })
     })
 })
 var sideListMenuDropdownOpen = null
 var sideListScrollTimeout = null
-monitorSideList.on('mouseup','[data-bs-toggle="dropdown"]',function(){
+monitorSideList.on('mouseup', '[data-bs-toggle="dropdown"]', function () {
     var dropdownElement = $(this).next()
     sideListMenuDropdownOpen = dropdownElement
-    setTimeout(function(){
+    setTimeout(function () {
         correctDropdownPosition(dropdownElement)
-    },500)
+    }, 500)
 })
-monitorSideList.on('hidden.bs.dropdown', '[data-bs-toggle="dropdown"]', function(e) {
+monitorSideList.on('hidden.bs.dropdown', '[data-bs-toggle="dropdown"]', function (e) {
     sideListMenuDropdownOpen = null
 })
 sidebarMenuInner.scroll(correctDropdownPositionAfterChange)
-$('[data-target="#monitorSideList"]').click(function(){
-    setTimeout(resizeMonitorIcons,500)
+$('[data-target="#monitorSideList"]').click(function () {
+    setTimeout(resizeMonitorIcons, 500)
 })
-$(window).resize(function(){
+$(window).resize(function () {
     fixSideMenuScroll()
     resizeMonitorIcons()
     correctDropdownPositionAfterChange()
 })
-onDashboardReady(function(){
+onDashboardReady(function () {
     pageTabLinks.find(`.side-menu-link.go-home`).addClass('page-link-active active');
     drawMonitors()
     fixSideMenuScroll()
     sortListMonitors()
     loadSideMenuCollapseStatus()
     makeMonitorListSortable()
-    $('.toggle-menu-collapse').click(function(){
+    $('.toggle-menu-collapse').click(function () {
         toggleSideMenuCollapse()
     })
-    $('body').on('click','.hide-side-menu-toggle',function(){
+    $('body').on('click', '.hide-side-menu-toggle', function () {
         toggleSideBarMenuHide()
     })
-    if(isSideBarMenuHidden()){
+    // Activar todas las cámaras desde el menú lateral
+    $('body').on('click', '.start-all-monitors', function () {
+        var monitors = Object.values($$.mon || {})
+
+        if (monitors.length === 0) {
+            new PNotify({
+                title: lang['No Monitors'] || 'Sin Cámaras',
+                text: lang['No monitors found to start'] || 'No se encontraron cámaras para activar',
+                type: 'warning'
+            })
+            return
+        }
+
+        var started = 0
+        var failed = 0
+        var total = monitors.length
+
+        monitors.forEach((monitor, index) => {
+            setTimeout(() => {
+                $.get(`${$user.auth_token}/monitor/${monitor.ke}/${monitor.mid}/record?reset=1`, function (data) {
+                    if (data.ok) {
+                        started++
+                    } else {
+                        failed++
+                    }
+
+                    if (index === total - 1) {
+                        setTimeout(() => {
+                            new PNotify({
+                                title: lang['Monitors Started'] || 'Cámaras Activadas',
+                                text: `${started} ${lang['monitors started successfully'] || 'cámaras activadas exitosamente'}. ${failed > 0 ? failed + ' ' + (lang['failed'] || 'fallaron') : ''}`,
+                                type: started > 0 ? 'success' : 'error'
+                            })
+                        }, 500)
+                    }
+                }).fail(function () {
+                    failed++
+                    if (index === total - 1) {
+                        setTimeout(() => {
+                            new PNotify({
+                                title: lang['Monitors Started'] || 'Cámaras Activadas',
+                                text: `${started} ${lang['monitors started successfully'] || 'cámaras activadas exitosamente'}. ${failed} ${lang['failed'] || 'fallaron'}`,
+                                type: started > 0 ? 'warning' : 'error'
+                            })
+                        }, 500)
+                    }
+                })
+            }, index * 500)
+        })
+    })
+    if (isSideBarMenuHidden()) {
         toggleSideBarMenuHide()
     }
 })
-onWebSocketEvent(function(d){
-    switch(d.f){
-        case'monitor_status':
-            monitorSideList.find('[data-mid="'+d.id+'"]').attr('data-status-code',d.code);
-        break;
-        case'monitor_snapshot':
-            setTimeout(function(){
+onWebSocketEvent(function (d) {
+    switch (d.f) {
+        case 'monitor_status':
+            monitorSideList.find('[data-mid="' + d.id + '"]').attr('data-status-code', d.code);
+            break;
+        case 'monitor_snapshot':
+            setTimeout(function () {
                 var snapElement = $(`[data-mid="${d.mid}"] .snapshot`)
-                switch(d.snapshot_format){
-                    case'plc':
-                        snapElement.attr('src',placeholder.getData(placeholder.plcimg({text:d.snapshot.toUpperCase().split('').join(' '), fsize: 25, bgcolor:'#1462a5'})))
-                    break;
-                    case'ab':
+                switch (d.snapshot_format) {
+                    case 'plc':
+                        snapElement.attr('src', placeholder.getData(placeholder.plcimg({ text: d.snapshot.toUpperCase().split('').join(' '), fsize: 25, bgcolor: '#1462a5' })))
+                        break;
+                    case 'ab':
                         var theReader = new FileReader()
-                        theReader.addEventListener("loadend",function(){
-                            snapElement.attr('src',d.reader.result)
-                            delete(theReader)
+                        theReader.addEventListener("loadend", function () {
+                            snapElement.attr('src', d.reader.result)
+                            delete (theReader)
                         })
-                        theReader.readAsDataURL(new Blob([d.snapshot],{type:"image/jpeg"}))
-                    break;
-                    case'b64':
-                        snapElement.attr('src','data:image/jpeg;base64,'+d.snapshot)
-                    break;
+                        theReader.readAsDataURL(new Blob([d.snapshot], { type: "image/jpeg" }))
+                        break;
+                    case 'b64':
+                        snapElement.attr('src', 'data:image/jpeg;base64,' + d.snapshot)
+                        break;
                 }
-            },1000)
-        break;
+            }, 1000)
+            break;
     }
 })

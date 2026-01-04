@@ -17,3 +17,9 @@ pm2 list
 
 echo "Shinobi iniciado correctamente"
 echo "Accede a: http://localhost:8080"
+
+# Ejecutar script de auto-activación de cámaras en segundo plano
+echo "Activando cámaras automáticamente..."
+nohup /home/dragwaysk/Shinobi/auto-enable-cameras.sh > /dev/null 2>&1 &
+
+echo "Script de auto-activación ejecutándose en segundo plano"
