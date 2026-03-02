@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  shinobi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shinobi
+    restart: unless-stopped
+    network_mode: "host"
+    privileged: true
+    devices:
+      # Aceleración por hardware (Intel VAAPI / QuickSync)
+      - /dev/dri:/dev/dri
+    volumes:
+      # Configuraciones esenciales
+      - ./conf.json:/home/Shinobi/conf.json
+      - ./super.json:/home/Shinobi/super.json
+      # Grabaciones hacia el cerebro de CENTIBOT (montado nativamente en su contenedor)
+      - /media/Jesus-Aroldo/Anexo/centibot_scripts/data/shinobi_videos:/home/Shinobi/videos
+      # Plugins por si queremos usar el puente
+      - ./plugins:/home/Shinobi/plugins
+    environment:
+      - NODE_ENV=production
+      - TZ=America/Caracas
