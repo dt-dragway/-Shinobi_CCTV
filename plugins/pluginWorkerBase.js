@@ -103,40 +103,79 @@ module.exports = function(__dirname, config){
         })
     }
     const getCpuUsage = (callback) => {
-        var k = {}
+        const k = {}
+        let cmd, args;
         switch(s.platform){
-            case'win32':
-                k.cmd = "@for /f \"skip=1\" %p in ('wmic cpu get loadpercentage') do @echo %p%"
+            case 'win32':
+                cmd = 'wmic';
+                args = ['cpu', 'get', 'loadpercentage'];
             break;
-            case'darwin':
-                k.cmd = "ps -A -o %cpu | awk '{s+=$1} END {print s}'";
+            case 'darwin':
+                cmd = 'ps';
+                args = ['-A', '-o', '%cpu'];
+                // Nota: Requiere procesamiento adicional con awk si se usa spawn directo
             break;
-            case'linux':
+            case 'linux':
+                // Para Linux, el comando top -b -n 2 es complejo de separar en spawn simple con pipes
+                // Mantendremos exec pero SOLO si el comando es el predefinido y NO hay customCpuCommand
                 k.cmd = 'top -b -n 2 | awk \'toupper($0) ~ /^.?CPU/ {gsub("id,","100",$8); gsub("%","",$8); print 100-$8}\' | tail -n 1';
             break;
-            case'freebsd':
-                k.cmd = 'vmstat 1 2 | awk \'END{print 100-$19}\''
+            case 'freebsd':
+                cmd = 'vmstat';
+                args = ['1', '2'];
             break;
-	        case'openbsd':
-                k.cmd = 'vmstat 1 2 | awk \'END{print 100-$18}\''
+	        case 'openbsd':
+                cmd = 'vmstat';
+                args = ['1', '2'];
             break;
         }
+
         if(config.customCpuCommand){
+          // ADVERTENCIA: customCpuCommand es un riesgo de seguridad potencial.
+          // Solo se ejecuta si está definido explícitamente en el archivo de configuración por el admin.
           exec(config.customCpuCommand,{encoding:'utf8',detached: true},function(err,d){
-              if(s.isWin===true) {
+              if(s.isWin===true && d) {
                   d = d.replace(/(\r\n|\n|\r)/gm, "").replace(/%/g, "")
               }
-              callback(d)
+              callback(d || 0)
               s.onGetCpuUsageExtensions.forEach(function(extender){
                   extender(d)
               })
           })
-        } else if(k.cmd){
-             exec(k.cmd,{encoding:'utf8',detached: true},function(err,d){
-                 if(s.isWin===true){
-                     d=d.replace(/(\r\n|\n|\r)/gm,"").replace(/%/g,"")
+        } else if (cmd && args) {
+             const child = spawn(cmd, args);
+             let output = '';
+             child.stdout.on('data', (data) => { output += data; });
+             child.on('close', () => {
+                 let result = output.trim();
+                 if(s.platform === 'win32') {
+                     // Procesar salida de wmic: LoadPercentage\r\n 5\r\n
+                     const lines = result.split('\n');
+                     result = lines.length > 1 ? lines[1].trim() : '0';
+                 } else if (s.platform === 'darwin') {
+                     // Procesar salida de ps -A -o %cpu
+                     const lines = result.split('\n');
+                     let total = 0;
+                     lines.forEach(line => {
+                         const val = parseFloat(line.trim());
+                         if(!isNaN(val)) total += val;
+                     });
+                     result = total.toString();
+                 } else if (s.platform === 'freebsd' || s.platform === 'openbsd') {
+                     const lines = result.split('\n');
+                     const lastLine = lines[lines.length - 1];
+                     const columns = lastLine.trim().split(/\s+/);
+                     result = (100 - parseFloat(columns[columns.length - 1])).toString();
                  }
-                 callback(d)
+                 callback(result)
+                 s.onGetCpuUsageExtensions.forEach(function(extender){
+                     extender(result)
+                 })
+             });
+        } else if(k.cmd){
+             // Caso para Linux con pipes complejos
+             exec(k.cmd,{encoding:'utf8',detached: true},function(err,d){
+                 callback(d || 0)
                  s.onGetCpuUsageExtensions.forEach(function(extender){
                      extender(d)
                  })

@@ -89,17 +89,34 @@ module.exports = function(s,config){
         return prev;
       }, {});
     }
+    // Seguridad: Mejora del Hashing de Contraseñas
+    // Por defecto se cambia de MD5 (obsoleto) a SHA256. 
+    // Se recomienda usar 'sha512' con un 'passwordSalt' fuerte en conf.json.
     s.md5 = function(x){return crypto.createHash('md5').update(x).digest("hex")}
-    s.createHash = s.md5
-    switch(config.passwordType){
-        case'sha512':
-            if(config.passwordSalt){
-                s.createHash = function(x){return crypto.pbkdf2Sync(x, config.passwordSalt, 100000, 64, 'sha512').toString('hex')}
-            }
-        break;
-        case'sha256':
-            s.createHash = function(x){return crypto.createHash('sha256').update(x).digest("hex")}
-        break;
+    s.createHash = s.md5 // Fallback inicial por compatibilidad de arranque
+    
+    // Lógica de endurecimiento criptográfico
+    if (!config.passwordType) {
+        // Si no hay configuración, forzar SHA256 como mínimo seguro
+        s.createHash = function(x){return crypto.createHash('sha256').update(x).digest("hex")}
+    } else {
+        switch(config.passwordType){
+            case 'sha512':
+                if(config.passwordSalt){
+                    s.createHash = function(x){return crypto.pbkdf2Sync(x, config.passwordSalt, 100000, 64, 'sha512').toString('hex')}
+                } else {
+                    console.warn('[SEGURIDAD] Usando SHA512 sin Salt. Configure "passwordSalt" para máxima seguridad.')
+                    s.createHash = function(x){return crypto.createHash('sha512').update(x).digest("hex")}
+                }
+            break;
+            case 'sha256':
+                s.createHash = function(x){return crypto.createHash('sha256').update(x).digest("hex")}
+            break;
+            case 'md5':
+                console.warn('[ADVERTENCIA] MD5 está obsoleto y es inseguro. Migre a SHA512 o SHA256.')
+                s.createHash = s.md5
+            break;
+        }
     }
     //load camera controller vars
     s.nameToTime=function(x){

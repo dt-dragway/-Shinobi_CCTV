@@ -3,7 +3,27 @@ const url = require('url');
 const http = require('http');
 const https = require('https');
 const express = require('express');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const app = express()
+
+// Endurecimiento de Seguridad (Hardening)
+app.use(helmet({
+    contentSecurityPolicy: false, // Se deshabilita CSP temporalmente para asegurar compatibilidad con plugins antiguos de Shinobi. En una fase posterior se puede habilitar con una lista blanca.
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Limitador de peticiones para prevenir ataques DoS y de fuerza bruta
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 500, // Límite de 500 peticiones por ventana de 15 min por IP
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: "Demasiadas peticiones desde esta IP, por favor inténtalo de nuevo en 15 minutos."
+});
+app.use(limiter);
+
 module.exports = function(s,config,lang,io){
     require('./monitor/websocket.js')(s,config,lang,io);
     app.disable('x-powered-by');

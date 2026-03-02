@@ -173,7 +173,9 @@ function buildLiveGridBlock(monitor){
     var detectionDrawDelay = detectionDrawDelays[monitorId];
     var quickLinkHtml = ''
     $.each(streamBlockInfo.quickLinks,function(n,button){
-        if(button.eval && !eval(button.eval))return;
+        // Seguridad: Se ha eliminado eval() para prevenir XSS. 
+        // Se recomienda usar flags booleanas en su lugar.
+        if(button.condition && monitor[button.condition] === false)return;
         quickLinkHtml += `<a title="${button.label}" class="btn btn-sm mr-1 badge btn-${button.class}"><i class="fa fa-${button.icon}"></i></a>`
     })
     var baseHtml = `<div
@@ -212,7 +214,8 @@ function buildLiveGridBlock(monitor){
             <ul class="mdl-overlay-menu list-group">`
             var buttons = streamBlockInfo.links
             $.each(buttons,function(n,button){
-                if(button.eval && !eval(button.eval))return;
+                // Seguridad: Se ha eliminado eval() para prevenir XSS. 
+                if(button.condition && monitor[button.condition] === false)return;
                 baseHtml += `<li class="list-item cursor-pointer ${button.class}" title="${button.label}" ${button.attr}><i class="fa fa-${button.icon}"></i> ${button.label}</li>`
             })
             baseHtml += `</ul>

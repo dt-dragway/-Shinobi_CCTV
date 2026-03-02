@@ -21,8 +21,14 @@ module.exports = function(s,config){
             splitQuery.forEach(function(v,n){
                 newQuery += v
                 var value = values[n]
-                if(value){
-                    if(isNaN(value) || value instanceof Date){
+                if(value !== undefined && value !== null){
+                    if(typeof value === 'string'){
+                        // Seguridad: Escapar comillas simples para evitar inyecciones en logs
+                        const escapedValue = value.replace(/'/g, "''")
+                        newQuery += "'"+escapedValue+"'"
+                    } else if(value instanceof Date){
+                        newQuery += "'"+value.toISOString()+"'"
+                    } else if(isNaN(value)){
                         newQuery += "'"+value+"'"
                     }else{
                         newQuery += value
