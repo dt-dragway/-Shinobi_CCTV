@@ -3,6 +3,9 @@
 docker stop shinobi
 docker rm shinobi
 
+echo "[→] Limpiando basura de Docker antigua..."
+docker system prune -f
+
 docker run -d --name shinobi \
   --restart unless-stopped \
   --network host \
